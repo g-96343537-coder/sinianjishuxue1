@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🌈 数学小勇士线上测验（35题）</title>
+  <style>
+    :root{
+      --bg-img: url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'); /* 可替换成你喜欢的梦幻彩虹背景 */
+      --card-bg: rgba(255,255,255,0.88);
+      --accent1: #c7b8ea; /* 浅紫 主 */
+      --accent2: #a7d8ff; /* 天蓝 次 */
+      --accent3: #b9fbc0; /* 薄荷绿 正确提示 */
+      --text: #21304a;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; padding:0; font-family: 'Comic Neue', 'Poppins', 'Microsoft YaHei', sans-serif; background-color:#eaf6ff; color:var(--text);
+      background-image: var(--bg-img);
+      background-size: cover; background-position: center; background-attachment: fixed; /* 固定背景图 */
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* 顶部标题栏 */
+    .titlebar{
+      width:100%; padding:22px 0; display:flex; align-items:center; justify-content:center; position:relative;
+      background: linear-gradient(90deg, rgba(199,184,234,0.95), rgba(167,216,255,0.95), rgba(185,251,192,0.95));
+      box-shadow: 0 6px 18px rgba(20,30,60,0.08);
+    }
+    .titlebar h1{ margin:0; font-size:28px; letter-spacing:1px; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,0.15); }
+    .titlebar .badge{ position:absolute; left:18px; top:12px; font-size:22px; }
+    .titlebar .decor{ position:absolute; right:18px; top:8px; opacity:0.95; }
+
+    /* 浮动云朵/星星 */
+    .float{ position:absolute; pointer-events:none; }
+    .cloud{ font-size:42px; animation: floaty 6s ease-in-out infinite; }
+    .star{ font-size:22px; animation: twinkle 3s linear infinite; }
+    @keyframes floaty{ 0%{ transform: translateY(0);}50%{ transform: translateY(-10px);}100%{ transform: translateY(0);} }
+    @keyframes twinkle{ 0%,100%{opacity:0.9}50%{opacity:0.5} }
+
+    /* 主区域 */
+    .shell{ max-width:1100px; margin:28px auto; padding:28px; }
+    .card{
+      background: var(--card-bg); border-radius:20px; padding:32px; box-shadow:0 12px 30px rgba(20,40,80,0.12);
+      backdrop-filter: blur(6px);
+    }
+
+    .meta{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .progress{ font-size:18px; }
+
+    .question{ font-size:26px; font-weight:700; margin-bottom:18px; color:var(--text); }
+
+    .options{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .opt{
+      padding:18px 20px; border-radius:18px; border:2px solid rgba(30,60,120,0.06); font-size:20px; cursor:pointer; background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.85));
+      transition: transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 6px 12px rgba(20,40,80,0.04);
+    }
+    .opt:hover{ transform: translateY(-6px); box-shadow: 0 18px 30px rgba(20,40,80,0.08); }
+
+    /* 三色按钮样式（内置用于标记） */
+    .opt.purple{ border-image: linear-gradient(90deg,#d8c7f4,#c7b8ea) 1; }
+    .opt.blue{ border-image: linear-gradient(90deg,#cfefff,#a7d8ff) 1; }
+    .opt.mint{ border-image: linear-gradient(90deg,#eaffef,#b9fbc0) 1; }
+
+    .opt.correct{ background: linear-gradient(90deg, rgba(185,251,192,0.9), rgba(220,255,230,0.9)); border-color: #76e29a; box-shadow:0 10px 26px rgba(100,200,140,0.12); }
+    .opt.wrong{ background: linear-gradient(90deg, rgba(255,228,230,0.95), rgba(255,240,241,0.95)); border-color:#ff9fa8; box-shadow:0 10px 26px rgba(255,140,140,0.06); }
+
+    .feedback{ margin-top:14px; font-size:20px; min-height:30px; }
+
+    .controls{ display:flex; justify-content:space-between; align-items:center; margin-top:24px; gap:12px; }
+    .btn{
+      padding:14px 26px; border-radius:20px; font-size:20px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 16px rgba(20,40,80,0.06);
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+    .btn:active{ transform: translateY(2px); }
+
+    .btn-primary{ background: linear-gradient(90deg,#dfd2fb,#c7b8ea); color:#3b2b5b; }
+    .btn-secondary{ background: linear-gradient(90deg,#dff4ff,#a7d8ff); color:#184a6b; }
+    .btn-success{ background: linear-gradient(90deg,#eaffef,#b9fbc0); color:#1b5d3f; }
+
+    .btn.hidden{ opacity:0; transform:scale(0.96); pointer-events:none; }
+
+    /* 完成提示 */
+    .done{ text-align:center; font-size:26px; padding:60px 20px; }
+
+    @media (max-width:820px){ .options{ grid-template-columns:1fr; } .question{ font-size:22px; } }
+  </style>
+</head>
+<body>
+
+  <div class="titlebar">
+    <div class="badge">🌈</div>
+    <h1>数学小勇士线上测验</h1>
+    <div class="decor">☁️ ⭐</div>
+    <div class="float" style="left:40px; top:4px;"><div class="cloud">☁️</div></div>
+    <div class="float" style="right:60px; top:10px;"><div class="star">✨</div></div>
+  </div>
+
+  <div class="shell">
+    <div class="card" id="card">
+      <div class="meta">
+        <div class="progress" id="progress">第 <span id="current">1</span> 题 / <span id="total">35</span></div>
+        <div class="score" id="score" style="font-weight:700;">已答对：0</div>
+      </div>
+
+      <div id="qArea">
+        <!-- 题目将由脚本注入 -->
+      </div>
+
+    </div>
+  </div>
+
+<script>
+// --- 题库（35题） ---
+const questions = [
+  {text:"数字 65,432 应该怎么读？", choices:["六万五千四百三十二","六万五千四百二十三","六万五千三百三十二","六万五千四百三十"], correct:0},
+  {text:"\"七万零八十\" 写成数字是？", choices:["70,080","70,800","7,080","7,800"], correct:0},
+  {text:"在数字 89,765 中，数字 7 的数值是多少？", choices:["7","70","700","7,000"], correct:2},
+  {text:"比较以下数字，哪个最大？", choices:["56,789","56,798","56,879","56,987"], correct:3},
+  {text:"哪个数字是偶数？", choices:["123","234","345","456"], correct:1},
+  {text:"一箱书有 35 本，18 箱大约有多少本书？", choices:["600","630","650","700"], correct:1},
+  {text:"数字 78,945 的万位近似值是多少？", choices:["70,000","78,000","79,000","80,000"], correct:3},
+  {text:"数列：3, 6, 9, 12, ? 下一个是什么？", choices:["15","18","21","24"], correct:0},
+  {text:"25,000 + 35,000 + 45,000 =", choices:["95,000","100,000","105,000","110,000"], correct:2},
+  {text:"计算：95,000 - 47,382 =", choices:["47,618","47,628","47,718","47,728"], correct:0},
+
+  {text:"将假分数 23/4 转换为带分数是多少？", choices:["5 3/4","5 2/4","5 1/4","5 3/5"], correct:0},
+  {text:"计算：3 2/5 + 1 3/5 + 2 = ?", choices:["6","7","7 1/5","7 2/5"], correct:1},
+  {text:"计算：8 - 4 5/8 = ?", choices:["3 3/8","3 5/8","4 3/8","4 5/8"], correct:0},
+  {text:"5 3/4 - 2 1/2 - 1 1/4 =", choices:["2","2 1/4","2 1/2","2 3/4"], correct:0},
+  {text:"4 1/3 + 2 - 1 2/3 =", choices:["4 2/3","4 1/3","4","3 2/3"], correct:0},
+  {text:"一桶油有 36 升，5/9 桶油有多少升？", choices:["18 升","20 升","22 升","24 升"], correct:1},
+  {text:"4.567 + 2.893 + 1.245 =", choices:["8.705","8.805","8.905","9.005"], correct:0},
+  {text:"计算：7.894 - 3.567 = ?", choices:["4.227","4.327","4.427","4.527"], correct:1},
+  {text:"计算：5.68 × 100 = ?", choices:["0.568","56.8","568","5,680"], correct:2},
+  {text:"计算：92.7 ÷ 100 = ?", choices:["0.927","9.27","927","9,270"], correct:0},
+
+  {text:"将 3/5 转换为百分比是多少？", choices:["60%","65%","70%","75%"], correct:0},
+  {text:"将 48% 转换为最简分数是多少？", choices:["12/25","13/25","14/25","15/25"], correct:0},
+  {text:"计算 180 的 45% 是多少？", choices:["78","80","81","82"], correct:2},
+  {text:"小明有 300 令吉，他花掉了 40% 的钱买书，又花了剩下的 30% 买文具。他还剩多少钱？", choices:["126 令吉","136 令吉","146 令吉","156 令吉"], correct:0},
+
+  {text:"计算：RM56,789 + RM43,211 + RM12,345 = ?", choices:["RM112,345","RM113,345","RM114,345","RM115,345"], correct:0},
+  {text:"计算：RM87,654 - RM32,168 = ?", choices:["RM55,486","RM55,586","RM55,686","RM55,786"], correct:0},
+  {text:"一台平板电脑售价为 RM1,850，学校购买了 28 台。总共需要支付多少钱？", choices:["RM51,800","RM52,800","RM53,800","RM54,800"], correct:0},
+  {text:"一家公司有 RM75,000 的年终奖金，平均分给 30 名员工。每名员工能得到多少奖金？", choices:["RM2,500","RM2,600","RM2,700","RM2,800"], correct:0},
+  {text:"计算：RM45,670 + RM23,450 - RM38,760 = ?", choices:["RM30,360","RM31,360","RM32,360","RM33,360"], correct:0},
+  {text:"计算：RM2,400 × 42 ÷ 12 = ?", choices:["RM8,400","RM8,600","RM8,800","RM9,000"], correct:0},
+
+  {text:"下午5时45分用24时计时法表示是多少？", choices:["05:45","15:45","17:45","19:45"], correct:2},
+  {text:"从早上7:20到当天下午3:50，总共经过了多少时间？", choices:["8小时30分钟","8小时40分钟","9小时30分钟","9小时40分钟"], correct:0},
+  {text:"小华做实验需要1小时25分钟，如果他从下午2:15开始，大约在什么时候结束？", choices:["下午3:40","下午3:45","下午3:50","下午3:55"], correct:0},
+  {text:"2个世纪等于多少年？", choices:["100年","200年","300年","400年"], correct:1},
+  {text:"4年8个月等于多少个月？", choices:["56个月","58个月","60个月","62个月"], correct:0}
+];
+
+// 状态
+let index = 0;
+let attempt = 0;
+let correctCount = 0;
+const total = questions.length;
+
+// 元素引用
+const qArea = document.getElementById('qArea');
+const currentEl = document.getElementById('current');
+const totalEl = document.getElementById('total');
+const scoreEl = document.getElementById('score');
+
+totalEl.textContent = total;
+
+function render(){
+  currentEl.textContent = index+1;
+  qArea.innerHTML = '';
+
+  const q = questions[index];
+  const qhtml = document.createElement('div');
+  qhtml.innerHTML = `<div class="question">${index+1}. ${q.text}</div>`;
+
+  const opts = document.createElement('div');
+  opts.className = 'options';
+
+  q.choices.forEach((ch, i)=>{
+    const d = document.createElement('div');
+    d.className = 'opt';
+    // 轮流使用三色样式，视觉更活泼
+    if (i%3===0) d.classList.add('purple');
+    else if (i%3===1) d.classList.add('blue');
+    else d.classList.add('mint');
+    d.innerHTML = `<strong>${String.fromCharCode(65+i)}.</strong> ${ch}`;
+    d.tabIndex = 0;
+    d.onclick = ()=> select(d, i);
+    d.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') select(d,i); };
+    opts.appendChild(d);
+  });
+
+  qhtml.appendChild(opts);
+
+  const fb = document.createElement('div'); fb.className='feedback';
+  qhtml.appendChild(fb);
+
+  const controls = document.createElement('div'); controls.className='controls';
+  const hint = document.createElement('div'); hint.style.fontSize='16px'; hint.style.color='#54627a'; hint.textContent = '单题模式 — 答错可重试一次，需点「下一题」才进入下一题。';
+  const next = document.createElement('button'); next.className='btn btn-secondary hidden'; next.textContent='下一题';
+  next.onclick = ()=>{
+    index++;
+    attempt = 0;
+    if(index<total) render(); else finish();
+  };
+  controls.appendChild(hint); controls.appendChild(next);
+  qhtml.appendChild(controls);
+
+  qArea.appendChild(qhtml);
+}
+
+function select(el, choice){
+  const fb = qArea.querySelector('.feedback');
+  const nextBtn = qArea.querySelector('button');
+  // 如果已经显示下一题按钮，则不允许再选
+  if(!nextBtn.classList.contains('hidden')) return;
+
+  attempt++;
+
+  const q = questions[index];
+  if(choice === q.correct){
+    el.classList.add('correct');
+    fb.textContent = '✅ 答对了！请按“下一题”继续。';
+    correctCount++;
+    scoreEl.textContent = '已答对：' + correctCount;
+    nextBtn.classList.remove('hidden');
+    // reveal correct styling (already marked)
+  } else {
+    el.classList.add('wrong');
+    if(attempt < 2){
+      fb.textContent = '❌ 再试一次！';
+    } else {
+      // 显示正确答案并解锁下一题
+      fb.textContent = `❌ 答错两次。正确答案：${String.fromCharCode(65+q.correct)}. ${q.choices[q.correct]}。按“下一题”继续。`;
+      const opts = qArea.querySelectorAll('.opt');
+      opts[q.correct].classList.add('correct');
+      nextBtn.classList.remove('hidden');
+    }
+  }
+}
+
+function finish(){
+  qArea.innerHTML = `<div class="done">🎉 恭喜完成测验！<br/>你答对了 <strong>${correctCount}</strong> / ${total} 题。</div>`;
+  currentEl.textContent = total;
+}
+
+render();
+</script>
+</body>
+</html>
